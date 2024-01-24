@@ -74,3 +74,41 @@ surveys %>%
   filter(weight == max(weight)) %>% 
   select(year, genus, species_id, weight) %>% 
   arrange(year)
+
+# Pivoting
+surveys_gw <- surveys %>% 
+  filter(!is.na(weight)) %>% 
+  group_by(plot_id, genus) %>% 
+  summarise(mean_weight = mean(weight))
+
+str(surveys_gw)
+
+surveys_wide <- surveys_gw %>% 
+                  pivot_wider(names_from = genus,
+                  values_from = mean_weight,
+                  values_fill = 0)
+
+surveys_wide %>% 
+  pivot_longer(names_to = "genus", values_to = "mean_weight", cols = -plot_id)
+
+# Challenge
+# 1
+surveys_long <- surveys %>% 
+  pivot_longer(names_to = "measurement", values_to = "value",
+               cols = c(hindfoot_length,weight))
+
+# 2
+surveys_long %>% 
+  group_by(year, measurement, plot_type) %>% 
+  summarise(mean_value = mean(value, na.rm = T)) %>% 
+  pivot_wider(names_from = measurement, values_from = mean_value)
+
+# Create dataset for the next part
+surveys_complete <- surveys %>% 
+                    filter(!is.na(weight),
+                           !is.na(hindfoot_length),
+                           !is.na(sex))
+
+write_csv(surveys_complete,
+          file = "data/surveys_complete.csv") # or whatever folder you want to save it (but it needs to exist already)
+  
