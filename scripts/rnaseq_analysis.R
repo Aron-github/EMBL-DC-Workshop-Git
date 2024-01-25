@@ -73,4 +73,48 @@ trans_cts %>%
   geom_abline(colour = "brown")
 
 # what if I want to look at ALLL correlations btw all samples in the data?
+trans_cts_corr <- trans_cts %>% 
+  select(-gene) %>% 
+  cor(method = "spearman") # it's a correlation matrix
 
+# Let's use a heatmap to visualize results
+library(corrr)
+
+rplot(trans_cts_corr) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+# Compare trans_cts and raw_cts
+summary(raw_cts_long$cts)
+summary(trans_cts_long$cts)
+
+raw_cts %>% 
+  ggplot(aes(x = wt_0_r1, y = wt_0_r2)) + 
+  geom_point() 
+
+raw_cts %>% 
+  ggplot(aes(x = wt_0_r1, y = wt_0_r2)) + 
+  geom_point() +
+  scale_x_continuous(trans = "log2") +
+  scale_y_continuous(trans = "log2")
+
+# let's look at the mean and variance of counts
+raw_cts_long %>% 
+  group_by(gene) %>% 
+  summarise(mean_cts = mean(cts), var_cts =var(cts)) %>% 
+  ggplot(aes(x = mean_cts, y = var_cts)) +
+  geom_point() +
+  geom_abline(colour = "brown") +
+  scale_x_continuous(trans = "log2") +
+  scale_y_continuous(trans = "log2")
+# rna seq counts are overdispersed
+# (they are not distributed like Poisson, where mean = variance)
+
+# that's why we transformed to normalize them.
+# let's check that this is true by looking at the normalized (transformed) data
+#  which have been manipulated with Deseq2
+trans_cts_long %>% 
+  group_by(gene) %>% 
+  summarise(mean_cts = mean(cts), var_cts =var(cts)) %>% 
+  ggplot(aes(x = mean_cts, y = var_cts)) +
+  geom_point()
+# the variance is stabilized, while the mean is free to change
