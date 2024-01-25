@@ -21,8 +21,7 @@ trans_cts_long <- full_join(trans_cts_long, sample_info, by = ("sample"))
 
 # Make the plot
 trans_cts_long %>%
-  # add pseudo-count of 1 because log(0) = -Inf
-  ggplot(aes(x = cts, colour = replicate)) + 
+  ggplot(aes(x = cts, colour = replicate)) + # for a frequency plot, we only need the x axis 
   geom_freqpoly(binwidth = 1) + 
   facet_grid(rows = vars(strain), cols = vars(minute))
 
@@ -53,3 +52,25 @@ raw_cts_long %>%
   ggplot(aes(x = log10(cts + 1), colour = replicate)) +  # now the x axis will have the exponent
   geom_freqpoly(binwidth = 1) + # NOTE: this binwith is now on log scale!!!
   facet_grid(rows = vars(strain), cols = vars(minute))
+
+# instead of the frequency polygon, let's make a boxplot
+raw_cts_long %>%
+  # make sure minute is specified as a factor
+  ggplot(aes(x = factor(minute), y = log10(cts + 1), fill = strain)) + 
+  geom_boxplot() + 
+  facet_grid(cols = vars(replicate))
+
+# Correlation between wt samples at T0 and T5
+# in this case is easier to use directly the wide data
+trans_cts %>% 
+  ggplot(aes(x = wt_0_r1, y = wt_30_r1)) + 
+  geom_point() +
+  geom_abline(colour = "brown")
+
+trans_cts %>% 
+  ggplot(aes(x = wt_0_r1, y = wt_0_r2)) + 
+  geom_point() +
+  geom_abline(colour = "brown")
+
+# what if I want to look at ALLL correlations btw all samples in the data?
+
