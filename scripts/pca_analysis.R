@@ -76,3 +76,41 @@ ggplot(data = top_loadings) +
   geom_text(aes(x = PC1, y = PC2, label = gene),
             nudge_y = 0.005, size = 3) +
   scale_x_continuous(expand = c(0.02, 0.02))
+
+loadings_plot <- ggplot(data = top_loadings) +
+  geom_segment(aes(x = 0, y = 0, xend = PC1, yend = PC2),
+               arrow = arrow(length = unit(0.1, "in")),
+               color = "brown") +
+  geom_text(aes(x = PC1, y = PC2, label = gene),
+            nudge_y = 0.005, size = 3) +
+  scale_x_continuous(expand = c(0.02, 0.02))
+
+pca_plot <- pc_scores %>% 
+  full_join(sample_info, by = "sample") %>% 
+  ggplot(aes(x = PC1, y = PC2, color = factor(minute), shape = strain)) +
+  geom_point()
+
+library(patchwork)
+# we can use it to arrange plots together in panels
+# Side by side:
+(pca_plot | loadings_plot)
+# One on top of the others
+(pca_plot / loadings_plot)
+
+# or even more complex than this
+(pca_plot | pca_plot | pca_plot)/loadings_plot +
+  plot_annotation(tag_levels = "A")
+
+# libraries with additional functions
+library(ggfortify)
+# pca plot without having to specify much
+autoplot(sample_pca)
+autoplot(sample_pca, data = sample_info, 
+         colour = "minute", 
+         shape = "strain")
+
+library(broom)
+# PC variances (eigen values) -> instead of having to extract it and convert it
+tidy(sample_pca, matrix = "eigenvalues")
+# variable loadings
+tidy(sample_pca, matrix = "loadings")
