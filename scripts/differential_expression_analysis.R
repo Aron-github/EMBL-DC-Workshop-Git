@@ -89,3 +89,30 @@ hclust_matrix <- hclust_matrix %>%
   scale() %>% 
   # transpose back so genes are as rows again
   t()
+
+gene_dist <- dist(hclust_matrix)
+
+# Hierarchical clustering
+gene_hclust <- hclust(gene_dist, method = "complete")
+plot(gene_hclust, labels = F) 
+abline(h = 10, col = "brown", lwd = 2)
+
+# make clusters based on the number of clusters I want
+cutree(gene_hclust, k = 5)
+
+gene_cluster <- cutree(gene_hclust, k = 5) %>% 
+  enframe() %>% # create a tibble out of it
+  rename(gene = name, cluster = value) # rename default names
+
+trans_cts_cluster <- trans_cts_mean %>% 
+  inner_join(gene_cluster, by = "gene")
+
+trans_cts_cluster %>% 
+  ggplot(aes(x = minute, y = mean_cts_scaled)) +
+  geom_line(aes(group = gene)) +
+  facet_grid(cols = vars(cluster), rows = vars(strain))
+
+# now we want a heatmap
+library(ComplexHeatmap)
+
+Heatmap(hclust_matrix, show_row_names = F)
