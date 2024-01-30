@@ -115,4 +115,4 @@ trans_cts_cluster %>%
 # now we want a heatmap
 library(ComplexHeatmap)
 
-Heatmap(hclust_matrix, show_row_names = F)
+Heatmap(hclust_matrix, show_row_names = F) 
